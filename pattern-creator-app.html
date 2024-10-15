@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Creator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #666;
+        }
+        input, select {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #patternContainer {
+            width: 400px;
+            height: 400px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pattern Creator</h1>
+        <div class="controls">
+            <div class="control-group">
+                <label for="shapeType">Shape:</label>
+                <select id="shapeType">
+                    <option value="circle">Circle</option>
+                    <option value="square">Square</option>
+                    <option value="triangle">Triangle</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="shapeSize">Size:</label>
+                <input type="number" id="shapeSize" value="20" min="5" max="100">
+            </div>
+            <div class="control-group">
+                <label for="shapeColor">Color:</label>
+                <input type="color" id="shapeColor" value="#ff0000">
+            </div>
+            <div class="control-group">
+                <label for="backgroundColor">Background:</label>
+                <input type="color" id="backgroundColor" value="#ffffff">
+            </div>
+        </div>
+        <button onclick="generatePattern()">Generate Pattern</button>
+        <button onclick="exportPNG()">Export PNG</button>
+        <button onclick="exportSVG()">Export SVG</button>
+        <div id="patternContainer"></div>
+    </div>
+
+    <script>
+        function generatePattern() {
+            const container = document.getElementById('patternContainer');
+            const shapeType = document.getElementById('shapeType').value;
+            const shapeSize = parseInt(document.getElementById('shapeSize').value);
+            const shapeColor = document.getElementById('shapeColor').value;
+            const backgroundColor = document.getElementById('backgroundColor').value;
+
+            container.innerHTML = '';
+            container.style.backgroundColor = backgroundColor;
+
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            container.appendChild(svg);
+
+            for (let x = 0; x < 400; x += shapeSize * 2) {
+                for (let y = 0; y < 400; y += shapeSize * 2) {
+                    let shape;
+                    switch (shapeType) {
+                        case 'circle':
+                            shape = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                            shape.setAttribute('cx', x + shapeSize);
+                            shape.setAttribute('cy', y + shapeSize);
+                            shape.setAttribute('r', shapeSize / 2);
+                            break;
+                        case 'square':
+                            shape = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                            shape.setAttribute('x', x);
+                            shape.setAttribute('y', y);
+                            shape.setAttribute('width', shapeSize);
+                            shape.setAttribute('height', shapeSize);
+                            break;
+                        case 'triangle':
+                            shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                            const points = `${x},${y + shapeSize} ${x + shapeSize / 2},${y} ${x + shapeSize},${y + shapeSize}`;
+                            shape.setAttribute('points', points);
+                            break;
+                    }
+                    shape.setAttribute('fill', shapeColor);
+                    svg.appendChild(shape);
+                }
+            }
+        }
+
+        function exportPNG() {
+            html2canvas(document.getElementById('patternContainer')).then(function(canvas) {
+                const link = document.createElement('a');
+                link.download = 'pattern.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function exportSVG() {
+            const svg = document.querySelector('#patternContainer svg');
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svg);
+            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+            const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+            const link = document.createElement('a');
+            link.download = 'pattern.svg';
+            link.href = url;
+            link.click();
+        }
+
+        // Generate initial pattern
+        generatePattern();
+    </script>
+</body>
+</html>
