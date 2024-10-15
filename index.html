@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Creator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+    <style>
+        /* ... (CSS remains the same) ... */
+    </style>
+</head>
+<body>
+    <!-- ... (HTML body remains the same) ... -->
+
+    <script>
+        // ... (Most of the JavaScript remains the same) ...
+
+        function exportPNG() {
+            html2canvas(document.getElementById('patternContainer')).then(function(canvas) {
+                const link = document.createElement('a');
+                link.download = 'pattern.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function exportSVG() {
+            const svg = document.querySelector('#patternContainer svg');
+            const serializer = new XMLSerializer();
+            let source = serializer.serializeToString(svg);
+            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+            const blob = new Blob([source], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = 'pattern.svg';
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Generate initial pattern
+        generatePattern();
+    </script>
+</body>
+</html>
